@@ -19,9 +19,10 @@ export async function start(resultObj) {
     return { automated: true, reason: `Playwright: ${playwright.reason}` };
   }
   if (automationDetected.automatedBrowser) {
+    console.log(`Automated browser: ${automationDetected.reason}`);
     return {
       automated: true,
-      reason: `Automated browser: ${automated.reason}`,
+      reason: `Automated browser: ${automationDetected.reason}`,
     };
   }
   return { automated: false, reason: "" };

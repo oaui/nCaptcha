@@ -37,28 +37,6 @@ export async function analyzeIntegrity(requestData) {
       reason: "Function patching detected.",
     };
   }
-  try {
-    throw new Error();
-  } catch (e) {
-    const stacks = [
-      "evaluate",
-      "automation",
-      "evaluation",
-      "initscript",
-      "frame.evaluate",
-      "page.evaluate",
-      "page.frames",
-      "cdp",
-    ];
-    for (const stack of stacks) {
-      if (e.stack.toLowerCase().includes(stack.toLowerCase())) {
-        return {
-          integrityPassed: false,
-          reason: "Suspicious error log detected.",
-        };
-      }
-    }
-  }
 
   return { integrityPassed: true, reason: "" };
 }
