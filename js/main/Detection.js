@@ -13,12 +13,15 @@ export async function start(resultObj) {
   const playwright = await detectPlaywright(window);
   const automated = await detectAutomation(requestData, interactionData);
   if (playwright.automatedBrowser) {
-    return { automated: true, reason: "Playwright" };
+    return { automated: true, reason: `Playwright: ${playwright.reason}` };
   }
-  if (automated) {
-    return { automated: true, reason: "Automated Browser" };
+  if (automated.automatedBrowser) {
+    return {
+      automated: true,
+      reason: `Automated browser: ${automated.reason}`,
+    };
   }
-  return { automated: false };
+  return { automated: false, reason: "" };
 }
 
 async function detectPlaywright(window) {
