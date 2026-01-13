@@ -1,7 +1,7 @@
 import { analyzeHeuristics } from "../detection/Heuristics.js";
 import { analyzeInteraction } from "../detection/Interaction.js";
 import { detectBrowser } from "../detection/util/Helpers.js";
-import { detectChromiumPlaywright } from "../detection/playwright/Chromium.js";
+import { detectPlaywright } from "../detection/playwright/Chromium.js";
 import { analyzeIntegrity } from "../detection/Integrity.js";
 
 export async function start(resultObj) {
@@ -10,12 +10,15 @@ export async function start(resultObj) {
 
   const window = requestData.window;
 
-  const playwright = await detectPlaywright(window);
-  const automated = await detectAutomation(requestData, interactionData);
+  const playwright = await handlePlaywright(window);
+  const automationDetected = await handleAutomation(
+    requestData,
+    interactionData
+  );
   if (playwright.automatedBrowser) {
     return { automated: true, reason: `Playwright: ${playwright.reason}` };
   }
-  if (automated.automatedBrowser) {
+  if (automationDetected.automatedBrowser) {
     return {
       automated: true,
       reason: `Automated browser: ${automated.reason}`,
@@ -24,14 +27,14 @@ export async function start(resultObj) {
   return { automated: false, reason: "" };
 }
 
-async function detectPlaywright(window) {
+async function handlePlaywright(window) {
   /**
    * Detect Python-patchwright and playwright based browsers
    */
 
   const browserType = detectBrowser(window);
   if (browserType.isChromium) {
-    const isPlaywright = await detectChromiumPlaywright(window);
+    const isPlaywright = await detectPlaywright(window);
     if (isPlaywright.isAutomated) {
       return {
         automatedBrowser: true,
@@ -41,21 +44,18 @@ async function detectPlaywright(window) {
     }
     return false;
   }
-  if (browserType.isFirefox) {
-    console.log("Checking firefox");
-  }
 }
-async function detectPuppeteer() {
+async function handlePuppeteer() {
   /**
    * Puppeteer + real-browser
    */
 }
-async function detectSelenium() {
+async function handleSelenium() {
   /**
    * Selenium web engine
    */
 }
-async function detectAutomation(requestData, interactionData) {
+async function handleAutomation(requestData, interactionData) {
   /**
    * * Detect automation based on heuristics like webdriver
    */
@@ -67,14 +67,15 @@ async function detectAutomation(requestData, interactionData) {
       reason: "Not humanly possible interaction",
     };
   }
-  console.log(requestData);
 
   const heuristicsValid = await analyzeHeuristics(requestData);
   if (heuristicsValid.heuristicsFailed) {
     return { automatedBrowser: true, reason: "Heuristics failed" };
   }
+
   const integrity = await analyzeIntegrity(requestData);
   if (!integrity.integrityPassed) {
     return { automatedBrowser: true, reason: "Integrity check failed" };
   }
+  return { automatedBrowser: false, reason: "" };
 }

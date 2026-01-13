@@ -8,7 +8,6 @@ export async function startValidation(interactionData, cookieStatus) {
   const requestData = await getRequestData();
   const checkResult = await setup(requestData, interactionData, cookieStatus);
   if (checkResult.automatedBrowser) {
-    console.log(checkResult.reason);
     return {
       validationSuccess: false,
       reason: `Automated browser detected: ${checkResult.reason}`,

@@ -5,7 +5,9 @@ export function detectBrowser(win) {
     ("app" in win.chrome ||
       "csi" in win.chrome ||
       "loadTimes" in win.chrome ||
-      !!win.navigator.userAgentData);
+      !!win.navigator.userAgentData?.brands?.some((b) =>
+        b.brand.includes("Chromium")
+      ));
 
   const isFirefox = typeof InstallTrigger !== "undefined";
 

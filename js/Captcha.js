@@ -12,7 +12,7 @@ export async function start() {
   const isMobile =
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
     window.innerWidth < 768;
-
+  console.log(window);
   const totalWidth = isMobile
     ? Math.min(randnum(280, 340), window.innerWidth - 40)
     : randnum(250, 380);
