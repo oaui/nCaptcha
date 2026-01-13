@@ -34,6 +34,9 @@ async function handlePlaywright(window) {
 
   const browserType = detectBrowser(window);
   if (browserType.isChromium) {
+    /**
+     * Can not use Playwright with FireFox, only Brave / Chromium Based browsers
+     */
     const isPlaywright = await detectPlaywright(window);
     if (isPlaywright.isAutomated) {
       return {
@@ -42,8 +45,12 @@ async function handlePlaywright(window) {
         reason: isPlaywright.reason,
       };
     }
-    return false;
   }
+  return {
+    automatedBrowser: false,
+    type: "",
+    reason: "",
+  };
 }
 async function handlePuppeteer() {
   /**
