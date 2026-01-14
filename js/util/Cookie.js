@@ -1,6 +1,6 @@
 export async function setCookie(name, expiresInMinutes, value, path = "/") {
   try {
-    const specialCookies = ["npow_failed", "npow_clear", "npow_rechallange"];
+    const specialCookies = ["npow_clearance"];
 
     const existingCookies = document.cookie.split(";").map((c) => c.trim());
     const alreadySet = specialCookies.some((special) =>
@@ -26,15 +26,19 @@ export async function setCookie(name, expiresInMinutes, value, path = "/") {
   }
 }
 
-export async function cookieSet(names) {
+export async function hasCookie(names) {
   if (!names) return false;
 
   const nameArray = Array.isArray(names) ? names : [names];
   const cookies = document.cookie.split(";").map((c) => c.trim());
+
   for (const name of nameArray) {
-    if (cookies.some((cookie) => cookie.startsWith(name + "="))) {
-      return { cookieFound: true, name }; // return the first match
+    const match = cookies.find((cookie) => cookie.startsWith(name + "="));
+    if (match) {
+      const value = match.split("=")[1]; // get the value part
+      return { cookieFound: true, name, value: decodeURIComponent(value) };
     }
   }
-  return { cookieFound: false, name: null };
+
+  return { cookieFound: false, name: null, value: null };
 }

@@ -1,4 +1,4 @@
-import { isNativeAccessor } from "../util/Helpers";
+import { isNativeAccessor } from "../util/Helpers.js";
 
 export async function detectPlaywright(window) {
   /**

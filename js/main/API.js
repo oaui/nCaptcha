@@ -1,5 +1,4 @@
-export async function apiValidation(clearHash, requestHost, userAgent) {
-  // Use the Codespace forwarded URL instead of localhost
+export async function apiValidation(requestHash = "", userAgent) {
   const apiUrl = window.location.hostname.includes("github.dev")
     ? `https://${window.location.hostname.replace(/-\d+/, "-8910")}/api`
     : "http://127.0.0.1:8910/api";
@@ -11,8 +10,7 @@ export async function apiValidation(clearHash, requestHost, userAgent) {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        clearhash: clearHash,
-        requesthost: requestHost,
+        requestHash: requestHash,
         useragent: userAgent,
       }),
     });
@@ -23,7 +21,7 @@ export async function apiValidation(clearHash, requestHost, userAgent) {
 
     const data = await response.json();
     if (data.success) {
-      return { isValid: true, hash: clearHash };
+      return { isValid: true, hash: data.hash };
     } else {
       return { isValid: false, hash: null };
     }

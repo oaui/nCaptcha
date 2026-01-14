@@ -297,36 +297,19 @@ export async function start() {
         navigator.vibrate(50);
       }
 
-      // Show verifying state
       showVerifyingState(slider, text);
 
-      // Run validation
       const validationResult = await startValidation(interactionData);
 
-      // Move slider to end
+      // Move slider
       slider.style.left = `${completionThreshold}px`;
       progress.style.width = `${totalWidth}px`;
 
-      // Apply status based on validation result
       if (validationResult.validationSuccess) {
         showSuccessState(slider, text, progress, isMobile);
-        // Set cookie to remember success
-        setCookie("npow_clear", "true", 1);
-      } else if (validationResult.shouldRechallenge) {
-        showRechallengeState(slider, text, progress, isMobile);
-        // Set cookie to track rechallenge
-        setCookie("npow_rechallenge", "true", 0.1);
-        // Allow retry after a delay
-        setTimeout(() => {
-          resetSlider(slider, progress, text, isMobile, completionThreshold);
-        }, 2000);
-      } else {
-        showFailureState(slider, text, progress, isMobile);
-        // Set cookie to remember failure
-        setCookie("npow_failed", "true", 0.5);
+        setCookie("npow_clearance", 5, validationResult.cookieHash);
       }
     } else {
-      // Slide back to start if not completed
       slider.style.transition = "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
       progress.style.transition = "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
 
