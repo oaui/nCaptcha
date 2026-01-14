@@ -1,3 +1,5 @@
+import { isNativeAccessor } from "../util/Helpers";
+
 export async function detectPlaywright(window) {
   /**
    * * Chrome
@@ -29,6 +31,16 @@ export async function detectPlaywright(window) {
         reason: "Brave-specific blockchain/crypto objects missing",
       };
     }
+  }
+  return { isAutomated: false, reason: "" };
+}
+export async function detectPuppeteer(window) {
+  const nativeScreen =
+    isNativeAccessor(MouseEvent.prototype, "screenX") &&
+    isNativeAccessor(MouseEvent.prototype, "screenY");
+
+  if (!nativeScreen) {
+    return { isAutomated: true, reason: "Puppeteer / Puppeteer-real-browser." };
   }
   return { isAutomated: false, reason: "" };
 }

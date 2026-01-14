@@ -1,7 +1,10 @@
 import { analyzeHeuristics } from "../detection/Heuristics.js";
 import { analyzeInteraction } from "../detection/Interaction.js";
 import { detectBrowser } from "../detection/util/Helpers.js";
-import { detectPlaywright } from "../detection/playwright/Chromium.js";
+import {
+  detectPlaywright,
+  detectPuppeteer,
+} from "../detection/playwright/Chromium.js";
 import { analyzeIntegrity } from "../detection/Integrity.js";
 
 export async function start(resultObj) {
@@ -11,12 +14,16 @@ export async function start(resultObj) {
   const window = requestData.window;
 
   const playwright = await handlePlaywright(window);
+  const puppeteer = await handlePuppeteer(window);
   const automationDetected = await handleAutomation(
     requestData,
     interactionData
   );
   if (playwright.automatedBrowser) {
     return { automated: true, reason: `Playwright: ${playwright.reason}` };
+  }
+  if (puppeteer.automatedBrowser) {
+    return { automated: true, reason: `Puppeteer: ${puppeteer.reason}` };
   }
   if (automationDetected.automatedBrowser) {
     console.log(`Automated browser: ${automationDetected.reason}`);
@@ -57,12 +64,21 @@ async function handlePuppeteer() {
   /**
    * Puppeteer + real-browser
    */
+  const isPuppeteer = await detectPuppeteer(window);
+  if (isPuppeteer.isAutomated) {
+    return {
+      automatedBrowser: true,
+      type: "Puppeteer",
+      reason: isPuppeteer.reason,
+    };
+  }
+  return {
+    automatedBrowser: false,
+    type: "",
+    reason: "",
+  };
 }
-async function handleSelenium() {
-  /**
-   * Selenium web engine
-   */
-}
+
 async function handleAutomation(requestData, interactionData) {
   /**
    * * Detect automation based on heuristics like webdriver
