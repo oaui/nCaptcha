@@ -2,7 +2,7 @@ import { isNativeAccessor } from "../util/Helpers.js";
 
 export async function detectPlaywright(window) {
   /**
-   * * Chrome
+   * * Chromium
    */
   const checks = {
     hasSpeechRecognitionPhrase: "SpeechRecognitionPhrase" in window,

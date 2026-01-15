@@ -20,6 +20,7 @@ export async function start(resultObj) {
     interactionData
   );
   if (playwright.automatedBrowser) {
+    console.log(`Playwright: ${playwright.reason}`);
     return { automated: true, reason: `Playwright: ${playwright.reason}` };
   }
   if (puppeteer.automatedBrowser) {
@@ -88,7 +89,7 @@ async function handleAutomation(requestData, interactionData) {
   if (interactionValid.isSuspicious) {
     return {
       automatedBrowser: true,
-      reason: "Not humanly possible interaction",
+      reason: `Not humanly possible interaction: ${interactionValid.reason}`,
     };
   }
 

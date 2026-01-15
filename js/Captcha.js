@@ -235,18 +235,44 @@ export async function start() {
 
   const interactionData = {
     mouseMovements: [],
+    pointerEvents: [],
     clicks: [],
   };
 
-  interactionData.mouseMovements = (
-    await interactionListeners(interactionData)
-  ).mouseMovements;
-  interactionData.clicks = (await interactionListeners(interactionData)).clicks;
+  const mouseMoveHandler = (e) => {
+    if (!active) return; // Only log when dragging
+    interactionData.mouseMovements.push({
+      x: e.clientX,
+      y: e.clientY,
+      t: Date.now(),
+      isTrusted: e.isTrusted,
+    });
+  };
+
+  const pointerMoveHandler = (e) => {
+    if (!active) return; // Only log when dragging
+    interactionData.pointerEvents.push({
+      x: e.clientX,
+      y: e.clientY,
+      t: Date.now(),
+      pressure: e.pressure,
+      pointerType: e.pointerType,
+      isTrusted: e.isTrusted,
+    });
+  };
+
+  const clickHandler = (e) => {
+    if (!active) return; // Only log when dragging
+    interactionData.clicks.push({
+      x: e.clientX,
+      y: e.clientY,
+      t: Date.now(),
+      isTrusted: e.isTrusted,
+    });
+  };
 
   slider.addEventListener("pointerdown", async (downEvent) => {
     if (completed) return;
-
-    console.log(downEvent);
 
     downEvent.preventDefault();
 
@@ -257,12 +283,15 @@ export async function start() {
     slider.setPointerCapture(downEvent.pointerId);
 
     slider.style.transition = "none";
+
+    document.addEventListener("mousemove", mouseMoveHandler);
+    document.addEventListener("pointermove", pointerMoveHandler);
+    document.addEventListener("click", clickHandler);
   });
 
   document.addEventListener("pointermove", async (dragEvent) => {
     if (!active) return;
 
-    console.log(dragEvent);
     dragEvent.preventDefault();
 
     const deltaX = dragEvent.clientX - startX;
@@ -282,9 +311,12 @@ export async function start() {
   document.addEventListener("pointerup", async (releaseEvent) => {
     if (!active) return;
 
-    console.log(releaseEvent);
     releaseEvent.preventDefault();
     active = false;
+
+    document.removeEventListener("mousemove", mouseMoveHandler);
+    document.removeEventListener("pointermove", pointerMoveHandler);
+    document.removeEventListener("click", clickHandler);
 
     slider.style.transition = "";
     slider.style.transform = "";
@@ -308,6 +340,8 @@ export async function start() {
       if (validationResult.validationSuccess) {
         showSuccessState(slider, text, progress, isMobile);
         setCookie("npow_clearance", 5, validationResult.cookieHash);
+      } else {
+        showFailureState(slider, text, progress, isMobile);
       }
     } else {
       slider.style.transition = "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
@@ -344,27 +378,28 @@ export async function start() {
   );
 }
 
-async function interactionListeners({ mouseMovements = [], clicks = [] }) {
-  document.addEventListener("mousemove", (e) => {
-    mouseMovements.push({
+function interactionListeners(slider, interactionData) {
+  slider.addEventListener("mousemove", (e) => {
+    interactionData.mouseMovements.push({
       x: e.clientX,
       y: e.clientY,
       t: Date.now(),
       isTrusted: e.isTrusted,
     });
   });
-
-  document.addEventListener("click", (e) => {
-    console.log(e);
-    clicks.push({
+  slider.addEventListener("pointermove", (e) => {
+    interactionData.pointerEvents.push({
+      event: e,
+    });
+  });
+  slider.addEventListener("click", (e) => {
+    interactionData.clicks.push({
       x: e.clientX,
       y: e.clientY,
       t: Date.now(),
       isTrusted: e.isTrusted,
     });
   });
-
-  return { mouseMovements, clicks };
 }
 
 function showVerifyingState(slider, text) {
@@ -404,44 +439,4 @@ function showFailureState(slider, text, progress, isMobile) {
   if (isMobile && "vibrate" in navigator) {
     navigator.vibrate([100, 50, 100]);
   }
-}
-
-function showRechallengeState(slider, text, progress, isMobile) {
-  slider.innerHTML = "";
-  slider.classList.remove("verifying");
-  slider.classList.add("rechallenge");
-  progress.classList.add("rechallenge");
-  slider.style.cursor = "default";
-  slider.innerHTML = '<span class="error-icon">↻</span>';
-  text.textContent = "Try again";
-
-  if (isMobile && "vibrate" in navigator) {
-    navigator.vibrate([50, 100, 50]);
-  }
-}
-
-function resetSlider(slider, progress, text, isMobile, completionThreshold) {
-  // Remove all state classes
-  slider.classList.remove("success", "error", "rechallenge", "verifying");
-  progress.classList.remove("success", "error", "rechallenge");
-
-  // Reset slider appearance
-  slider.innerHTML = "▶";
-  slider.style.cursor = "grab";
-  text.textContent = isMobile ? "Swipe to verify" : "Slide to verify";
-
-  // Animate back to start
-  slider.style.transition = "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
-  progress.style.transition = "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
-
-  slider.style.left = "0px";
-  progress.style.width = "0px";
-
-  // Mark as not completed so user can try again
-  completed = false;
-
-  setTimeout(() => {
-    slider.style.transition = "";
-    progress.style.transition = "";
-  }, 300);
 }
