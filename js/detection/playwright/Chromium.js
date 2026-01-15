@@ -1,3 +1,4 @@
+import { isIncognito } from "../../util/Util.js";
 import { isNativeAccessor } from "../util/Helpers.js";
 
 export async function detectPlaywright(window) {
@@ -19,19 +20,25 @@ export async function detectPlaywright(window) {
    * * Brave browser
    */
   const isBrave = !!window.navigator?.brave;
+
   if (isBrave) {
     const hasBraveEthereum =
       !!window.braveEthereum || !!window.window?.braveEthereum;
     const hasBraveSolana = !!window.braveSolana || !!window.window?.braveSolana;
     const hasSolana = !!window.solana || !!window.window?.solana;
 
-    if (!hasBraveEthereum || !hasBraveSolana || !hasSolana) {
+    if (hasBraveEthereum && hasBraveSolana && hasSolana) {
       return {
-        isAutomated: true,
-        reason: "Brave-specific blockchain/crypto objects missing",
+        isAutomated: false,
+        reason: "",
       };
     }
+    return {
+      isAutomated: false,
+      reason: "Likely Brave incognito, interaction detection will handle this.",
+    };
   }
+
   return { isAutomated: false, reason: "" };
 }
 export async function detectPuppeteer(window) {
