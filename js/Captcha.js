@@ -240,7 +240,7 @@ export async function start() {
   };
 
   const mouseMoveHandler = (e) => {
-    if (!active) return; // Only log when dragging
+    if (!active) return;
     interactionData.mouseMovements.push({
       x: e.clientX,
       y: e.clientY,
@@ -250,7 +250,7 @@ export async function start() {
   };
 
   const pointerMoveHandler = (e) => {
-    if (!active) return; // Only log when dragging
+    if (!active) return;
     interactionData.pointerEvents.push({
       x: e.clientX,
       y: e.clientY,
@@ -262,7 +262,7 @@ export async function start() {
   };
 
   const clickHandler = (e) => {
-    if (!active) return; // Only log when dragging
+    if (!active) return;
     interactionData.clicks.push({
       x: e.clientX,
       y: e.clientY,
@@ -376,30 +376,6 @@ export async function start() {
     },
     { passive: false }
   );
-}
-
-function interactionListeners(slider, interactionData) {
-  slider.addEventListener("mousemove", (e) => {
-    interactionData.mouseMovements.push({
-      x: e.clientX,
-      y: e.clientY,
-      t: Date.now(),
-      isTrusted: e.isTrusted,
-    });
-  });
-  slider.addEventListener("pointermove", (e) => {
-    interactionData.pointerEvents.push({
-      event: e,
-    });
-  });
-  slider.addEventListener("click", (e) => {
-    interactionData.clicks.push({
-      x: e.clientX,
-      y: e.clientY,
-      t: Date.now(),
-      isTrusted: e.isTrusted,
-    });
-  });
 }
 
 function showVerifyingState(slider, text) {
