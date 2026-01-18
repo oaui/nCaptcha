@@ -4,7 +4,7 @@ import { detectBrowser } from "../detection/util/Helpers.js";
 import {
   detectPlaywright,
   detectPuppeteer,
-} from "../detection/playwright/Chromium.js";
+} from "../detection/browsers/Chromium.js";
 import { analyzeIntegrity } from "../detection/Integrity.js";
 
 export async function start(resultObj) {
