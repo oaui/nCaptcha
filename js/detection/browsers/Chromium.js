@@ -1,4 +1,4 @@
-import { isIncognito } from "../../util/Util.js";
+import { isIncognito, isMobile } from "../../util/Util.js";
 import { isNativeAccessor } from "../util/Helpers.js";
 
 export async function detectPlaywright(window) {
@@ -9,13 +9,13 @@ export async function detectPlaywright(window) {
     hasSpeechRecognitionPhrase: "SpeechRecognitionPhrase" in window,
     hasInterestEvent: "InterestEvent" in window,
   };
+
   if (!checks.hasInterestEvent) {
     return { isAutomated: true, reason: "Missing InterestEvent." };
   }
   if (!checks.hasSpeechRecognitionPhrase) {
     return { isAutomated: true, reason: "Missing Speech Recognition." };
   }
-
   /**
    * * Brave browser
    */

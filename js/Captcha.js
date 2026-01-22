@@ -297,7 +297,7 @@ export async function start() {
     const deltaX = dragEvent.clientX - startX;
     const newPosition = Math.max(
       0,
-      Math.min(completionThreshold, currentX + deltaX)
+      Math.min(completionThreshold, currentX + deltaX),
     );
 
     slider.style.left = `${newPosition}px`;
@@ -340,6 +340,13 @@ export async function start() {
       if (validationResult.validationSuccess) {
         showSuccessState(slider, text, progress, isMobile);
         setCookie("npow_clearance", 5, validationResult.cookieHash);
+        window.parent.postMessage(
+          {
+            type: "ncaptcha-solved",
+            token: validationResult.cookieHash,
+          },
+          "*",
+        );
       } else {
         showFailureState(slider, text, progress, isMobile);
       }
@@ -364,7 +371,7 @@ export async function start() {
         e.stopPropagation();
       }
     },
-    { passive: false }
+    { passive: false },
   );
 
   slider.addEventListener(
@@ -374,7 +381,7 @@ export async function start() {
         e.stopPropagation();
       }
     },
-    { passive: false }
+    { passive: false },
   );
 }
 

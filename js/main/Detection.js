@@ -6,6 +6,7 @@ import {
   detectPuppeteer,
 } from "../detection/browsers/Chromium.js";
 import { analyzeIntegrity } from "../detection/Integrity.js";
+import { isMobile } from "../util/Util.js";
 
 export async function start(resultObj) {
   const requestData = resultObj.data.requestData;
@@ -13,19 +14,35 @@ export async function start(resultObj) {
 
   const window = requestData.window;
 
-  const playwright = await handlePlaywright(window);
-  const puppeteer = await handlePuppeteer(window);
+  const isMobileDevice = isMobile(window);
+
+  if (!isMobileDevice) {
+    /**
+     * The idea: seperate detection logic for desktop
+     * and mobile browsers, as mobile browsers have
+     * different propertiess, such as ontouchcancel,ontouchend,ontouchmove,
+     * ontouchstart,onorientationchange,orientation
+     */
+    const playwright = await handlePlaywright(window);
+    const puppeteer = await handlePuppeteer(window);
+
+    if (playwright.automatedBrowser) {
+      console.log(`Playwright: ${playwright.reason}`);
+      return { automated: true, reason: `Playwright: ${playwright.reason}` };
+    }
+    if (puppeteer.automatedBrowser) {
+      return { automated: true, reason: `Puppeteer: ${puppeteer.reason}` };
+    }
+  }
+  /**
+   * ! This is checked, regardless of platform, as most properties are similar,
+   * ? e.g., webdriver, languages, plugins, etc.
+   * ? those, which are not, are handled using the isMobile function
+   */
   const automationDetected = await handleAutomation(
     requestData,
-    interactionData
+    interactionData,
   );
-  if (playwright.automatedBrowser) {
-    console.log(`Playwright: ${playwright.reason}`);
-    return { automated: true, reason: `Playwright: ${playwright.reason}` };
-  }
-  if (puppeteer.automatedBrowser) {
-    return { automated: true, reason: `Puppeteer: ${puppeteer.reason}` };
-  }
   if (automationDetected.automatedBrowser) {
     console.log(`Automated browser: ${automationDetected.reason}`);
     return {
@@ -95,12 +112,18 @@ async function handleAutomation(requestData, interactionData) {
 
   const heuristicsValid = await analyzeHeuristics(requestData);
   if (heuristicsValid.heuristicsFailed) {
-    return { automatedBrowser: true, reason: "Heuristics failed" };
+    return {
+      automatedBrowser: true,
+      reason: `Heuristics failed: ${heuristicsValid.reason}`,
+    };
   }
 
   const integrity = await analyzeIntegrity(requestData);
   if (!integrity.integrityPassed) {
-    return { automatedBrowser: true, reason: "Integrity check failed" };
+    return {
+      automatedBrowser: true,
+      reason: `Integrity check failed: ${integrity.reason}`,
+    };
   }
   return { automatedBrowser: false, reason: "" };
 }

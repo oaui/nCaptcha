@@ -1,27 +1,16 @@
 import express from "express";
 import crypto from "crypto";
 import cors from "cors";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const app = express();
 app.use(express.json());
 
 const PORT = 8910;
 
-const clearanceStore = new Map();
-
-const CLEARANCE_TTL_MINUTES = 60;
-
-function generateHash() {
-  return crypto.randomBytes(32).toString("hex");
-}
-
-function now() {
-  return Date.now();
-}
-
-function expiresAt(minutes) {
-  return now() + minutes * 60 * 1000;
-}
+const SECRET = process.env.NPOW_SECRET;
 
 /**
  * Helper to get real client IP
@@ -33,35 +22,60 @@ function getClientIP(req) {
     ""
   );
 }
+function signPayload(payload) {
+  const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
+
+  const sig = crypto
+    .createHmac("sha256", SECRET)
+    .update(body)
+    .digest("base64url");
+
+  return `${body}.${sig}`;
+}
+
+function verifyToken(token) {
+  const [body, sig] = token.split(".");
+  if (!body || !sig) return null;
+
+  const expectedSig = crypto
+    .createHmac("sha256", SECRET)
+    .update(body)
+    .digest("base64url");
+
+  if (sig !== expectedSig) return null;
+
+  const payload = JSON.parse(Buffer.from(body, "base64url").toString());
+
+  if (payload.exp < Date.now()) return null;
+
+  return payload;
+}
+
 app.use(
   cors({
     origin: "*", // or "http://127.0.0.1:5500"
     methods: ["POST", "GET", "OPTIONS"],
     allowedHeaders: ["Content-Type"],
-  })
+  }),
 );
 app.post("/api", (req, res) => {
   const { requestHash, useragent } = req.body;
   const clientIP = getClientIP(req);
 
   if (!useragent) {
-    return res.status(400).json({ success: false });
+    return res.json({ success: false });
   }
 
   /**
-   * CASE 1: Hash provided → validate
+   * CASE 1: Validate existing token
    */
   if (requestHash) {
-    const entry = clearanceStore.get(requestHash);
-
-    if (!entry) return res.json({ success: false });
-
-    if (entry.expires < now()) {
-      clearanceStore.delete(requestHash);
+    const payload = verifyToken(requestHash);
+    if (!payload) {
       return res.json({ success: false });
     }
 
-    if (entry.userAgent !== useragent || entry.ip !== clientIP) {
+    if (payload.ua !== useragent || payload.ip !== clientIP) {
       return res.json({ success: false });
     }
 
@@ -69,19 +83,21 @@ app.post("/api", (req, res) => {
   }
 
   /**
-   * CASE 2: No hash → issue new clearance
+   * CASE 2: Issue new token
    */
-  const newHash = generateHash();
-  clearanceStore.set(newHash, {
-    userAgent: useragent,
+  const payload = {
+    ua: useragent,
     ip: clientIP,
-    expires: expiresAt(CLEARANCE_TTL_MINUTES),
-  });
+    iat: Date.now(),
+    exp: Date.now() + 5 * 60 * 1000, // 5 min
+  };
+
+  const token = signPayload(payload);
 
   return res.json({
     success: true,
-    hash: newHash,
-    expiresInMinutes: CLEARANCE_TTL_MINUTES,
+    hash: token,
+    expiresInMinutes: 5,
   });
 });
 

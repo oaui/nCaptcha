@@ -14,7 +14,11 @@ export async function startValidation(interactionData) {
       reason: `Automated browser detected: ${checkResult.reason}`,
     };
   } else {
-    return { validationSuccess: true, reason: "" };
+    return {
+      validationSuccess: true,
+      reason: "",
+      cookieHash: checkResult.cookieHash,
+    };
   }
 }
 async function setup(data, interactionData) {
@@ -46,11 +50,15 @@ async function setup(data, interactionData) {
   } else {
     const setCookieHash = await apiValidation("", navigator.userAgent);
     if (setCookieHash.isValid && setCookieHash.hash) {
-      /**
-       * ? Incase, the user passed the captcha, set a clearance cookie which lasts for 5 minutes.
-       */
-      await setCookie("npow_clearance", 5, setCookieHash.hash);
+      return {
+        automatedBrowser: false,
+        reason: "",
+        cookieHash: setCookieHash.hash,
+      };
     }
-    return { automatedBrowser: false, reason: "" };
   }
+  return {
+    automatedBrowser: true,
+    reason: "Failed to issue validation token",
+  };
 }
