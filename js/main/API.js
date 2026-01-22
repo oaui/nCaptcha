@@ -1,8 +1,10 @@
 export async function apiValidation(requestHash = "", userAgent) {
   const apiUrl = window.location.hostname.includes("github.dev")
     ? `https://${window.location.hostname.replace(/-\d+/, "-8910")}/api`
-    : "http://127.0.0.1:8910/api";
-
+    : "http://192.168.178.39:8910/api";
+  /**
+   * Production version of API on Laptop
+   */
   try {
     const response = await fetch(apiUrl, {
       method: "POST",

@@ -14,3 +14,9 @@ export async function isIncognito(window) {
     return false;
   }
 }
+export function isMobile(window) {
+  if ("onorientationchange" in window && "orientation" in window) {
+    return true;
+  }
+  return false;
+}
