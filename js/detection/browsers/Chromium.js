@@ -51,3 +51,17 @@ export async function detectPuppeteer(window) {
   }
   return { isAutomated: false, reason: "" };
 }
+export async function detectSelenium(window) {
+  const checks = {
+    hasRetNodes: "ret_nodes" in window,
+  };
+
+  if (checks.hasRetNodes) {
+    return {
+      isAutomated: true,
+      reason: "Selenium Chrome Driver detected via ret_nodes.",
+    };
+  }
+
+  return { isAutomated: false, reason: "" };
+}

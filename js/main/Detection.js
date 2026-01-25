@@ -4,6 +4,7 @@ import { detectBrowser } from "../detection/util/Helpers.js";
 import {
   detectPlaywright,
   detectPuppeteer,
+  detectSelenium,
 } from "../detection/browsers/Chromium.js";
 import { analyzeIntegrity } from "../detection/Integrity.js";
 import { isMobile } from "../util/Util.js";
@@ -25,7 +26,12 @@ export async function start(resultObj) {
      */
     const playwright = await handlePlaywright(window);
     const puppeteer = await handlePuppeteer(window);
+    const selenium = await handleSelenium(window);
 
+    if (selenium.automatedBrowser) {
+      console.log(`Selenium: ${selenium.reason}`);
+      return { automated: true, reason: `Selenium: ${selenium.reason}` };
+    }
     if (playwright.automatedBrowser) {
       console.log(`Playwright: ${playwright.reason}`);
       return { automated: true, reason: `Playwright: ${playwright.reason}` };
@@ -96,7 +102,24 @@ async function handlePuppeteer() {
     reason: "",
   };
 }
-
+async function handleSelenium() {
+  /**
+   * Selenium + patched Chrome driver
+   */
+  const isSelenium = await detectSelenium(window);
+  if (isSelenium.isAutomated) {
+    return {
+      automatedBrowser: true,
+      type: "Selenium",
+      reason: isSelenium.reason,
+    };
+  }
+  return {
+    automatedBrowser: false,
+    type: "",
+    reason: "",
+  };
+}
 async function handleAutomation(requestData, interactionData) {
   /**
    * * Detect automation based on heuristics like webdriver
