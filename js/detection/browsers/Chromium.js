@@ -56,7 +56,9 @@ export async function detectSelenium(window) {
     hasRetNodes: "ret_nodes" in window,
   };
 
-  if (checks.hasRetNodes) {
+  const props = Object.getOwnPropertyNames(window);
+
+  if (checks.hasRetNodes || props.includes("ret_nodes")) {
     return {
       isAutomated: true,
       reason: "Selenium Chrome Driver detected via ret_nodes.",

@@ -58,6 +58,11 @@ app.use(
     allowedHeaders: ["Content-Type"],
   }),
 );
+/**
+ * TODO: Implement /verify endpoint for the client:
+ * ? So they can verify the token, check if the server has the token, which the client sent and validate it
+ *
+ */
 app.post("/api", (req, res) => {
   const { requestHash, useragent } = req.body;
   const clientIP = getClientIP(req);
