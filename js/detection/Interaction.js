@@ -1,6 +1,8 @@
 export async function analyzeInteraction(interactionData) {
   const clicks = interactionData.clicks;
   const mouseMovements = interactionData.mouseMovements;
+  const pointerClickDurations = interactionData.pointerClickDurations;
+  const pointerEvents = interactionData.pointerEvents;
 
   if (clicks && mouseMovements) {
     clicks.forEach((click) => {
@@ -14,15 +16,43 @@ export async function analyzeInteraction(interactionData) {
       }
     });
   }
-  const movementCurve = await inspectMouseMovment(interactionData);
+  const movementCurve = await inspectMouseMovment(pointerEvents);
   if (movementCurve.botMovement) {
     return { isSuspicious: true, reason: movementCurve.reason };
   }
+  const clickInspection = await inspectPointerClicks(pointerClickDurations);
+  if (clickInspection.botMovement) {
+    return { isSuspicious: true, reason: clickInspection.reason };
+  }
   return { isSuspicious: false, reason: "" };
 }
-async function inspectMouseMovment(interactionData) {
-  const pointerEvents = interactionData.pointerEvents;
 
+async function inspectPointerClicks(pointerClicks) {
+  if (!pointerClicks || pointerClicks.length < 1) {
+    return { botMovement: false, reason: "No mouse clicks recorded" };
+  }
+
+  for (const click of pointerClicks) {
+    if (!click.isTrusted) {
+      return {
+        botMovement: true,
+        reason: "Untrusted Mouseclick event",
+      };
+    }
+
+    if (click.clickDuration <= 1 && click.pointerType === "up") {
+      console.log(click);
+      return {
+        botMovement: true,
+        reason: "Absurdly fast mouse click",
+      };
+    }
+  }
+
+  return { botMovement: false, reason: "" };
+}
+
+async function inspectMouseMovment(pointerEvents) {
   const CHUNK_SIZE = 20;
   const avgYs = [];
 

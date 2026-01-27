@@ -26,12 +26,12 @@ export async function start(resultObj) {
      */
     const playwright = await handlePlaywright(window);
     const puppeteer = await handlePuppeteer(window);
-    const selenium = await handleSelenium(window);
+    /*const selenium = await handleSelenium(window);
     console.log(playwright, puppeteer, selenium);
     if (selenium.automatedBrowser) {
       console.log(`Selenium: ${selenium.reason}`);
       return { automated: true, reason: `Selenium: ${selenium.reason}` };
-    }
+    }*/
     if (playwright.automatedBrowser) {
       console.log(`Playwright: ${playwright.reason}`);
       return { automated: true, reason: `Playwright: ${playwright.reason}` };

@@ -230,12 +230,14 @@ export async function start() {
 
   let active = false;
   let startX = 0;
+  let pointerClickDuration = 0;
   let currentX = 0;
   let completed = false;
 
   const interactionData = {
     mouseMovements: [],
     pointerEvents: [],
+    pointerClickDurations: [],
     clicks: [],
   };
 
@@ -274,11 +276,20 @@ export async function start() {
   slider.addEventListener("pointerdown", async (downEvent) => {
     if (completed) return;
 
+    pointerClickDuration = performance.now();
+
     downEvent.preventDefault();
 
     active = true;
     startX = downEvent.clientX;
     currentX = parseInt(slider.style.left || "0", 10);
+
+    interactionData.pointerClickDurations.push({
+      type: "down",
+      clickDuration: pointerClickDuration,
+      pointerType: downEvent.pointerType,
+      isTrusted: downEvent.isTrusted,
+    });
 
     slider.setPointerCapture(downEvent.pointerId);
 
@@ -310,6 +321,16 @@ export async function start() {
 
   document.addEventListener("pointerup", async (releaseEvent) => {
     if (!active) return;
+
+    const duration = performance.now() - pointerClickDuration;
+
+    interactionData.pointerClickDurations.push({
+      type: "up",
+      clickDuration: duration,
+      pointerType: releaseEvent.pointerType,
+      isTrusted: releaseEvent.isTrusted,
+    });
+    pointerClickDuration = 0;
 
     releaseEvent.preventDefault();
     active = false;
