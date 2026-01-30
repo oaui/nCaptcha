@@ -82,6 +82,29 @@ export async function start() {
       touch-action: none;
     }
 
+    .slider.locked {
+      background: linear-gradient(135deg, #5a5a6e 0%, #4a4a5e 100%);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(90, 90, 110, 0.4);
+    }
+
+    .slider.locked:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(90, 90, 110, 0.6);
+    }
+
+    .slider.unlocked {
+      background: linear-gradient(135deg, #7b68ee 0%, #6a5acd 100%);
+      cursor: grab;
+      animation: unlock-pulse 0.4s ease-out;
+    }
+
+    @keyframes unlock-pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
     .slider:active { 
       cursor: grabbing;
       transform: scale(${isMobile ? "1.05" : "1.1"});
@@ -112,6 +135,10 @@ export async function start() {
       text-overflow: ellipsis;
       pointer-events: none;
       z-index: 1;
+    }
+
+    .lock-icon {
+      font-size: ${isMobile ? "24px" : "20px"};
     }
 
     .spinner {
@@ -217,9 +244,11 @@ export async function start() {
 
   <div class="slider-container">
     <div class="progress" id="progress"></div>
-    <div class="slider" id="slider">▶</div>
+    <div class="slider locked" id="slider">
+      <span class="lock-icon">🔒</span>
+    </div>
     <div class="slider-text">${
-      isMobile ? "Swipe to verify" : "Slide to verify"
+      isMobile ? "Tap to unlock" : "Click to unlock"
     }</div>
   </div>
 `;
@@ -233,6 +262,7 @@ export async function start() {
   let pointerClickDuration = 0;
   let currentX = 0;
   let completed = false;
+  let unlocked = false;
 
   const interactionData = {
     mouseMovements: [],
@@ -273,8 +303,26 @@ export async function start() {
     });
   };
 
+  // Click handler to unlock the slider
+  slider.addEventListener("click", (clickEvent) => {
+    if (!unlocked && !completed) {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
+      
+      unlocked = true;
+      slider.classList.remove("locked");
+      slider.classList.add("unlocked");
+      slider.innerHTML = "▶";
+      text.textContent = isMobile ? "Swipe to verify" : "Slide to verify";
+      
+      if (isMobile && "vibrate" in navigator) {
+        navigator.vibrate(30);
+      }
+    }
+  });
+
   slider.addEventListener("pointerdown", async (downEvent) => {
-    if (completed) return;
+    if (completed || !unlocked) return;
 
     pointerClickDuration = performance.now();
 
@@ -301,7 +349,7 @@ export async function start() {
   });
 
   document.addEventListener("pointermove", async (dragEvent) => {
-    if (!active) return;
+    if (!active || !unlocked) return;
 
     dragEvent.preventDefault();
 

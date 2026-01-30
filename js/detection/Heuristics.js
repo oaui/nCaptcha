@@ -3,9 +3,7 @@ export async function analyzeHeuristics(requestData) {
 
   const language = await languageCheck(browser);
   if (language.isSuspicious) {
-    /**
-     * Implement flagging logic
-     */
+    return {heuristicsFailed: true, reason: language.reason};
   }
   return { heuristicsFailed: false, reason: "" };
 }
