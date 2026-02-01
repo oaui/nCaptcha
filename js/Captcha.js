@@ -256,7 +256,7 @@ export async function start() {
   <div class="slider-container">
     <div class="progress" id="progress"></div>
     <div class="slider locked" id="slider">
-      <img src="../img/logo_lock.png" alt="nCaptcha lock Logo">
+      <img src="/img/logo_lock.png" alt="nCaptcha lock Logo">
     </div>
     <div class="slider-text">${
       isMobile ? "Tap to unlock" : "Click to unlock"
