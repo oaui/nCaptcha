@@ -1,5 +1,7 @@
 import { randnum } from "../util/Util.js";
+import { getRequestData } from "../util/ObjectUtil.js";
 import { setCookie, hasCookie } from "../util/Cookie.js";
+import { Result } from "../obj/Result.js";
 import { start } from "./Detection.js";
 import { apiValidation } from "./API.js";
 

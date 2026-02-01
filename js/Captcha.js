@@ -332,7 +332,7 @@ export async function start() {
     }
   });
 
-  slider.addEventListener("pointerdown", async (downEvent) => {
+  document.addEventListener("pointerdown", async (downEvent) => {
     if (completed || !unlocked) return;
 
     pointerClickDuration = performance.now();
