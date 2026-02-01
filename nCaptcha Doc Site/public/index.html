@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nCaptcha - Advanced Bot Detection</title>
+    <link rel="stylesheet" href="css/config.css" />
+    <link rel="icon" type="image/svg+xml" href="img/logo.png" />
+    <link rel="alternate icon" type="image/png" href="img/logo.png" />
+  </head>
+  <script>
+    window.addEventListener("message", async (event) => {
+      if (event.data?.type !== "ncaptcha-solved") return;
+
+      const token = event.data.token;
+
+      if (token) {
+        console.log("Human verified using iFrame returned token");
+      }
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+      const demoHost = document.getElementById("demo-shadow-host");
+      const shadow = demoHost.attachShadow({ mode: "closed" });
+
+      shadow.innerHTML = `
+        <style>
+          :host {
+            display: block;
+          }
+          
+          .demo-section {
+            background: linear-gradient(135deg, rgba(88, 28, 135, 0.1) 0%, rgba(67, 56, 202, 0.05) 100%);
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            margin: 3rem 0;
+            backdrop-filter: blur(10px);
+          }
+
+          h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #ffffff;
+            text-align: center;
+          }
+
+          p {
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+          }
+
+          .demo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100px;
+          }
+
+          iframe {
+            border: none;
+            overflow: hidden;
+            width: 380px;
+            height: 65px;
+            border-radius: 8px;
+          }
+        </style>
+        
+        <section id="demo" class="demo-section">
+          <h3>Live Demo</h3>
+          <p>Try the captcha below. Simply slide to verify you're human.</p>
+          <div class="demo-container">
+            <iframe
+              src="https://challenges.netforensics.dev"
+              frameborder="0"
+              scrolling="no"
+              allow="cross-origin-isolated"
+              sandbox="allow-same-origin allow-scripts"
+              tabindex="0"
+            ></iframe>
+          </div>
+        </section>
+      `;
+    });
+  </script>
+
+  <body>
+    <header>
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">
+            <img src="img/logo.png" alt="nCaptcha Logo" />
+          </div>
+          <h1>nCaptcha</h1>
+        </div>
+        <nav>
+          <a href="#demo">Demo</a>
+          <a href="#technical">Technical</a>
+          <a href="mailto:ju@netforensics.dev">Contact</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero Section -->
+      <section class="hero">
+        <div class="badge">Next-Gen Bot Detection</div>
+        <h2>Stop Bots, Not Humans</h2>
+        <p>
+          Advanced behavioral analysis and fingerprinting to detect automated
+          browsers like Playwright, Puppeteer, and Selenium without disrupting
+          legitimate users.
+        </p>
+      </section>
+
+      <div id="demo-shadow-host"></div>
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-number">99.7%</div>
+          <div class="stat-label">Bot Detection Rate</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">&lt;2s</div>
+          <div class="stat-label">Average Solve Time</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">0%</div>
+          <div class="stat-label">False Positives</div>
+        </div>
+        <div class="stat">
+          <div class="stat-number">5+</div>
+          <div class="stat-label">Detection Layers</div>
+        </div>
+      </div>
+
+      <!-- Technical Details -->
+      <section id="technical" class="technical-section">
+        <h3>How It Works</h3>
+        <p style="margin-bottom: 2rem; color: var(--text-muted)">
+          nCaptcha employs multiple detection layers to identify automated
+          browsers:
+        </p>
+
+        <div class="detection-methods">
+          <div class="method">
+            <h5>1. Interaction Heuristics</h5>
+            <p>
+              Analyzes mouse movement patterns, acceleration, jitter, and
+              timing. Bots typically exhibit perfect linear movements or erratic
+              jumps that humans don't produce. Tracks events and pointer
+              pressure data.
+            </p>
+          </div>
+
+          <div class="method">
+            <h5>2. Browser Fingerprinting</h5>
+            <p>
+              Captures complete <code>window</code> object properties including
+              enumerable status, native function signatures, and prototype
+              chains. Detects modifications made by Playwright, Puppeteer,
+              Selenium, and Patchright.
+            </p>
+          </div>
+
+          <div class="method">
+            <h5>3. Automation Markers</h5>
+            <p>
+              Checks for telltale signs and other framework-specific properties
+              that automation tools inject.
+            </p>
+          </div>
+
+          <div class="method">
+            <h5>4. CDP Domain Detection</h5>
+            <p>
+              Exploits known bugs in Patchright where Console CDP Domain is
+              disabled. Tests console event capture, page error events, and
+              service worker registration.
+            </p>
+          </div>
+
+          <div class="method">
+            <h5>5. Property Comparison</h5>
+            <p>
+              Compares thousands of browser properties against baseline from
+              legitimate browsers. Detects missing properties, type mismatches,
+              and altered descriptors.
+            </p>
+          </div>
+        </div>
+
+        <h4 style="margin-top: 3rem; margin-bottom: 1rem; font-size: 1.5rem">
+          Integration Example
+        </h4>
+        <div class="code-block">
+          <pre>
+&lt;!-- Add to your HTML --&gt;
+&lt;iframe
+  src="https://challenges.netforensics.dev"
+  style="width: 380px; height: 65px; border: none"
+  sandbox="allow-same-origin allow-scripts"
+&gt;&lt;/iframe&gt;
+
+&lt;script&gt;
+  // Listen for verification success
+  window.addEventListener('message', (event) => {
+    if (event.data.type === 'captcha-verified') {
+      console.log('User verified!');
+      // Proceed with form submission
+    }
+  });
+&lt;/script&gt;</pre
+          >
+        </div>
+      </section>
+
+      <!-- Use Cases -->
+      <section class="demo-section">
+        <h3>Use Cases</h3>
+        <div style="display: grid; gap: 1rem; margin-top: 2rem">
+          <div style="display: flex; gap: 1rem; align-items: start">
+            <div>
+              <h5 style="margin-bottom: 0.5rem">E-Commerce Protection</h5>
+              <p style="color: var(--text-muted)">
+                Prevent bot scalping, fake reviews, and inventory hoarding
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 1rem; align-items: start">
+            <div>
+              <h5 style="margin-bottom: 0.5rem">Form Spam Prevention</h5>
+              <p style="color: var(--text-muted)">
+                Stop automated form submissions and fake registrations
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 1rem; align-items: start">
+            <div>
+              <h5 style="margin-bottom: 0.5rem">Ticket Sales</h5>
+              <p style="color: var(--text-muted)">
+                Ensure fair access by blocking ticket bots and resellers
+              </p>
+            </div>
+          </div>
+          <div style="display: flex; gap: 1rem; align-items: start">
+            <div>
+              <h5 style="margin-bottom: 0.5rem">Login Protection</h5>
+              <p style="color: var(--text-muted)">
+                Defend against credential stuffing and brute force attacks
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-content">
+        <div class="footer-links">
+          <a href="#demo">Demo</a>
+          <a href="#technical">Technical</a>
+          <a href="https://github.com/oaui" target="_blank">GitHub</a>
+          <a href="mailto:ju@netforensics.dev">Contact</a>
+        </div>
+        <p class="copyright">
+          © 2026 nCaptcha. Advanced bot detection for the modern web.
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>
