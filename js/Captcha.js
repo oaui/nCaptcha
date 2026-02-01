@@ -209,6 +209,17 @@ export async function start() {
       opacity: 0.5;
     }
 
+    .lock-icon {
+      font-size: ${isMobile ? "24px" : "20px"};
+    }
+
+    .slider img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      pointer-events: none;
+    }
     .checkmark {
       font-size: ${isMobile ? "26px" : "22px"};
       animation: checkmark-pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -245,7 +256,7 @@ export async function start() {
   <div class="slider-container">
     <div class="progress" id="progress"></div>
     <div class="slider locked" id="slider">
-      <span class="lock-icon">🔒</span>
+      <img src="../img/logo_lock.png" alt="nCaptcha lock Logo">
     </div>
     <div class="slider-text">${
       isMobile ? "Tap to unlock" : "Click to unlock"
@@ -308,13 +319,13 @@ export async function start() {
     if (!unlocked && !completed) {
       clickEvent.preventDefault();
       clickEvent.stopPropagation();
-      
+
       unlocked = true;
       slider.classList.remove("locked");
       slider.classList.add("unlocked");
       slider.innerHTML = "▶";
       text.textContent = isMobile ? "Swipe to verify" : "Slide to verify";
-      
+
       if (isMobile && "vibrate" in navigator) {
         navigator.vibrate(30);
       }
