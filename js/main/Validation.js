@@ -1,13 +1,13 @@
 import { randnum } from "../util/Util.js";
 import { getRequestData } from "../util/ObjectUtil.js";
 import { setCookie, hasCookie } from "../util/Cookie.js";
-import { Result } from "../obj/Result.js";
+import { Config } from "../obj/Config.js";
 import { start } from "./Detection.js";
 import { apiValidation } from "./API.js";
 
-export async function startValidation(interactionData) {
+export async function startValidation(interactionData, mode) {
   const requestData = await getRequestData();
-  const checkResult = await setup(requestData, interactionData);
+  const checkResult = await setup(requestData, interactionData, mode);
   if (checkResult.automatedBrowser) {
     return {
       validationSuccess: false,
@@ -21,10 +21,11 @@ export async function startValidation(interactionData) {
     };
   }
 }
-async function setup(data, interactionData) {
-  const result = new Result();
-  result.data.requestData = data;
-  result.data.interactionData = interactionData;
+async function setup(data, interactionData, mode) {
+  const config = new Config();
+  config.data.requestData = data;
+  config.data.interactionData = interactionData;
+  config.settings.mode = mode;
 
   /**
    * * Check, if the requesting client has a cookie called npow_clearance:
@@ -44,7 +45,7 @@ async function setup(data, interactionData) {
     }
   }
 
-  const detection = await start(result);
+  const detection = await start(config);
   if (detection.automated) {
     return { automatedBrowser: true, reason: detection.reason };
   } else {

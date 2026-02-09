@@ -9,9 +9,10 @@ import {
 import { analyzeIntegrity } from "../detection/Integrity.js";
 import { isMobile } from "../util/Util.js";
 
-export async function start(resultObj) {
-  const requestData = resultObj.data.requestData;
-  const interactionData = resultObj.data.interactionData;
+export async function start(config) {
+  const requestData = config.data.requestData;
+  const interactionData = config.data.interactionData;
+  const mode = config.settings.mode;
 
   const window = requestData.window;
 
@@ -26,12 +27,12 @@ export async function start(resultObj) {
      */
     const playwright = await handlePlaywright(window);
     const puppeteer = await handlePuppeteer(window);
-    /*const selenium = await handleSelenium(window);
+    const selenium = await handleSelenium(window);
     console.log(playwright, puppeteer, selenium);
     if (selenium.automatedBrowser) {
       console.log(`Selenium: ${selenium.reason}`);
       return { automated: true, reason: `Selenium: ${selenium.reason}` };
-    }*/
+    }
     if (playwright.automatedBrowser) {
       console.log(`Playwright: ${playwright.reason}`);
       return { automated: true, reason: `Playwright: ${playwright.reason}` };
@@ -48,6 +49,7 @@ export async function start(resultObj) {
   const automationDetected = await handleAutomation(
     requestData,
     interactionData,
+    mode,
   );
   if (automationDetected.automatedBrowser) {
     console.log(`Automated browser: ${automationDetected.reason}`);
@@ -120,17 +122,19 @@ async function handleSelenium() {
     reason: "",
   };
 }
-async function handleAutomation(requestData, interactionData) {
+async function handleAutomation(requestData, interactionData, mode) {
   /**
    * * Detect automation based on heuristics like webdriver
    */
 
-  const interactionValid = await analyzeInteraction(interactionData);
-  if (interactionValid.isSuspicious) {
-    return {
-      automatedBrowser: true,
-      reason: `Not humanly possible interaction: ${interactionValid.reason}`,
-    };
+  if (!mode.invisible) {
+    const interactionValid = await analyzeInteraction(interactionData);
+    if (interactionValid.isSuspicious) {
+      return {
+        automatedBrowser: true,
+        reason: `Not humanly possible interaction: ${interactionValid.reason}`,
+      };
+    }
   }
 
   const heuristicsValid = await analyzeHeuristics(requestData);

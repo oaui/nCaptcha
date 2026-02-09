@@ -12,7 +12,7 @@ export async function start() {
   const isMobile =
     /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) ||
     window.innerWidth < 768;
-  console.log(window);
+
   const totalWidth = isMobile
     ? Math.min(randnum(280, 340), window.innerWidth - 40)
     : randnum(250, 380);
@@ -24,7 +24,7 @@ export async function start() {
   shadow.innerHTML = `
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
@@ -33,6 +33,59 @@ export async function start() {
       -webkit-touch-callout: none;
       -webkit-user-select: none;
       user-select: none;
+    }
+
+    .captcha-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+      width: ${totalWidth}px;
+      transition: opacity 0.3s ease;
+    }
+
+    .mode-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: ${isMobile ? "12px 8px" : "10px 8px"};
+      border: 2px solid rgba(106, 90, 205, 0.3);
+      border-radius: 12px;
+      background: linear-gradient(135deg, #2c2c3e 0%, #1a1a2e 100%);
+      color: rgba(255, 255, 255, 0.7);
+      font-family: inherit;
+      font-size: ${isMobile ? "13px" : "12px"};
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .mode-btn:hover {
+      border-color: rgba(106, 90, 205, 0.6);
+      color: rgba(255, 255, 255, 0.9);
+      background: linear-gradient(135deg, #33334a 0%, #222238 100%);
+    }
+
+    .mode-btn.selected {
+      border-color: #7b68ee;
+      color: #fff;
+      background: linear-gradient(135deg, #3a3a52 0%, #282842 100%);
+      box-shadow: 0 0 12px rgba(106, 90, 205, 0.25);
+    }
+
+    .mode-btn-icon {
+      font-size: ${isMobile ? "18px" : "16px"};
+      line-height: 1;
     }
 
     .slider-container {
@@ -45,8 +98,9 @@ export async function start() {
       box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.05);
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       touch-action: none;
-      margin: 0 auto;
     }
+
+    .slider-container.hidden { display: none; }
 
     .progress {
       position: absolute;
@@ -105,7 +159,7 @@ export async function start() {
       100% { transform: scale(1); }
     }
 
-    .slider:active { 
+    .slider:active {
       cursor: grabbing;
       transform: scale(${isMobile ? "1.05" : "1.1"});
       box-shadow: 0 2px 8px rgba(106, 90, 205, 0.5);
@@ -137,8 +191,67 @@ export async function start() {
       z-index: 1;
     }
 
-    .lock-icon {
-      font-size: ${isMobile ? "24px" : "20px"};
+    .slider img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .invisible-container {
+      position: relative;
+      width: ${totalWidth}px;
+      height: ${containerHeight}px;
+      background: linear-gradient(135deg, #2c2c3e 0%, #1a1a2e 100%);
+      border-radius: ${containerHeight / 2}px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3), inset 0 1px 3px rgba(255, 255, 255, 0.05);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: all 0.25s ease;
+    }
+
+    .invisible-container.hidden { display: none; }
+
+    .invisible-container.success {
+      background: linear-gradient(135deg, #2a3a2c 0%, #1a2e1a 100%);
+    }
+
+    .invisible-container.error {
+      background: linear-gradient(135deg, #3e2c2c 0%, #2e1a1a 100%);
+    }
+
+    .invisible-text {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: ${isMobile ? "15px" : "14px"};
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+    }
+
+    .invisible-spinner {
+      width: ${isMobile ? "22px" : "18px"};
+      height: ${isMobile ? "22px" : "18px"};
+      border: 2.5px solid rgba(255, 255, 255, 0.15);
+      border-top-color: #7b68ee;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .invisible-checkmark {
+      color: #66bb6a;
+      font-size: ${isMobile ? "22px" : "18px"};
+      animation: checkmark-pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    .invisible-error-icon {
+      color: #ef5350;
+      font-size: ${isMobile ? "22px" : "18px"};
+      animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
     }
 
     .spinner {
@@ -160,10 +273,7 @@ export async function start() {
       50% { opacity: 0.6; }
     }
 
-    .slider.verifying {
-      animation: pulse 1.5s ease-in-out infinite;
-      cursor: default;
-    }
+    .slider.verifying { animation: pulse 1.5s ease-in-out infinite; cursor: default; }
 
     .slider.success {
       background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
@@ -209,17 +319,6 @@ export async function start() {
       opacity: 0.5;
     }
 
-    .lock-icon {
-      font-size: ${isMobile ? "24px" : "20px"};
-    }
-
-    .slider img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 50%;
-      pointer-events: none;
-    }
     .checkmark {
       font-size: ${isMobile ? "26px" : "22px"};
       animation: checkmark-pop 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -244,7 +343,7 @@ export async function start() {
 
     /* Prevent iOS bounce/zoom */
     @supports (-webkit-touch-callout: none) {
-      .slider-container {
+      .captcha-wrapper {
         position: fixed;
         top: 50%;
         left: 50%;
@@ -253,26 +352,107 @@ export async function start() {
     }
   </style>
 
-  <div class="slider-container">
-    <div class="progress" id="progress"></div>
-    <div class="slider locked" id="slider">
-      <img src="/img/logo_lock.png" alt="nCaptcha lock Logo">
+  <div class="captcha-wrapper">
+    <div class="mode-selector" id="mode-selector">
+      <button class="mode-btn selected" id="btn-slider" type="button">
+        <span class="mode-btn-icon">☰</span> Slider
+      </button>
+      <button class="mode-btn" id="btn-invisible" type="button">
+        <span class="mode-btn-icon">👁</span> Invisible
+      </button>
     </div>
-    <div class="slider-text">${
-      isMobile ? "Tap to unlock" : "Click to unlock"
-    }</div>
+
+    <div class="slider-container" id="slider-container">
+      <div class="progress" id="progress"></div>
+      <div class="slider locked" id="slider">
+        <img src="/img/logo_lock.png" alt="nCaptcha lock Logo">
+      </div>
+      <div class="slider-text" id="slider-text">${isMobile ? "Tap to unlock" : "Click to unlock"}</div>
+    </div>
+
+    <div class="invisible-container hidden" id="invisible-container">
+      <div class="invisible-spinner"></div>
+      <span class="invisible-text">Verifying...</span>
+    </div>
   </div>
 `;
 
+  const sliderContainer = shadow.getElementById("slider-container");
+  const invisibleContainer = shadow.getElementById("invisible-container");
+  const modeSelector = shadow.getElementById("mode-selector");
+  const btnSlider = shadow.getElementById("btn-slider");
+  const btnInvisible = shadow.getElementById("btn-invisible");
+
   const slider = shadow.getElementById("slider");
   const progress = shadow.getElementById("progress");
-  const text = shadow.querySelector(".slider-text");
+  const sliderText = shadow.getElementById("slider-text");
+
+  let activeMode = "slider";
+  let completed = false;
+
+  function lockModeSelector() {
+    completed = true;
+    modeSelector.style.opacity = "0.5";
+    modeSelector.style.pointerEvents = "none";
+  }
+
+  btnSlider.addEventListener("click", () => {
+    if (completed) return;
+    activeMode = "slider";
+    btnSlider.classList.add("selected");
+    btnInvisible.classList.remove("selected");
+    sliderContainer.classList.remove("hidden");
+    invisibleContainer.classList.add("hidden");
+  });
+
+  btnInvisible.addEventListener("click", async () => {
+    if (completed) return;
+    activeMode = "invisible";
+    btnInvisible.classList.add("selected");
+    btnSlider.classList.remove("selected");
+    sliderContainer.classList.add("hidden");
+    invisibleContainer.classList.remove("hidden");
+
+    lockModeSelector();
+
+    if (isMobile && "vibrate" in navigator) navigator.vibrate(30);
+
+    const interactionData = {
+      mouseMovements: [],
+      pointerEvents: [],
+      pointerClickDurations: [],
+      clicks: [],
+    };
+
+    const mode = { invisible: true, slider: false, click: false };
+    const validationResult = await startValidation(interactionData, mode);
+
+    if (validationResult.validationSuccess) {
+      invisibleContainer.classList.add("success");
+      invisibleContainer.innerHTML = `
+        <span class="invisible-checkmark">✓</span>
+        <span class="invisible-text">${isMobile ? "Verified!" : "Verified successfully"}</span>
+      `;
+      setCookie("npow_clearance", 5, validationResult.cookieHash);
+      window.parent.postMessage(
+        { type: "ncaptcha-solved", token: validationResult.cookieHash },
+        "*",
+      );
+      if (isMobile && "vibrate" in navigator) navigator.vibrate([50, 50, 50]);
+    } else {
+      invisibleContainer.classList.add("error");
+      invisibleContainer.innerHTML = `
+        <span class="invisible-error-icon">✕</span>
+        <span class="invisible-text">${isMobile ? "Failed" : "Verification failed"}</span>
+      `;
+      if (isMobile && "vibrate" in navigator) navigator.vibrate([100, 50, 100]);
+    }
+  });
 
   let active = false;
   let startX = 0;
   let pointerClickDuration = 0;
   let currentX = 0;
-  let completed = false;
   let unlocked = false;
 
   const interactionData = {
@@ -324,21 +504,20 @@ export async function start() {
       slider.classList.remove("locked");
       slider.classList.add("unlocked");
       slider.innerHTML = "▶";
-      text.textContent = isMobile ? "Swipe to verify" : "Slide to verify";
+      sliderText.textContent = isMobile ? "Swipe to verify" : "Slide to verify";
 
-      if (isMobile && "vibrate" in navigator) {
-        navigator.vibrate(30);
-      }
+      modeSelector.style.opacity = "0.5";
+      modeSelector.style.pointerEvents = "none";
+
+      if (isMobile && "vibrate" in navigator) navigator.vibrate(30);
     }
   });
 
   document.addEventListener("pointerdown", async (downEvent) => {
-    if (completed || !unlocked) return;
+    if (completed || !unlocked || activeMode !== "slider") return;
 
     pointerClickDuration = performance.now();
-
     downEvent.preventDefault();
-
     active = true;
     startX = downEvent.clientX;
     currentX = parseInt(slider.style.left || "0", 10);
@@ -351,7 +530,6 @@ export async function start() {
     });
 
     slider.setPointerCapture(downEvent.pointerId);
-
     slider.style.transition = "none";
 
     document.addEventListener("mousemove", mouseMoveHandler);
@@ -360,8 +538,7 @@ export async function start() {
   });
 
   document.addEventListener("pointermove", async (dragEvent) => {
-    if (!active || !unlocked) return;
-
+    if (!active || !unlocked || activeMode !== "slider") return;
     dragEvent.preventDefault();
 
     const deltaX = dragEvent.clientX - startX;
@@ -382,7 +559,6 @@ export async function start() {
     if (!active) return;
 
     const duration = performance.now() - pointerClickDuration;
-
     interactionData.pointerClickDurations.push({
       type: "up",
       clickDuration: duration,
@@ -404,39 +580,33 @@ export async function start() {
     const left = parseInt(slider.style.left || "0", 10);
 
     if (left >= completionThreshold - 10) {
-      completed = true;
-      if (isMobile && "vibrate" in navigator) {
-        navigator.vibrate(50);
-      }
+      lockModeSelector();
+      if (isMobile && "vibrate" in navigator) navigator.vibrate(50);
 
-      showVerifyingState(slider, text);
+      showVerifyingState(slider, sliderText);
 
-      const validationResult = await startValidation(interactionData);
+      const mode = { invisible: false, slider: true, click: false };
+      const validationResult = await startValidation(interactionData, mode);
 
       // Move slider
       slider.style.left = `${completionThreshold}px`;
       progress.style.width = `${totalWidth}px`;
 
       if (validationResult.validationSuccess) {
-        showSuccessState(slider, text, progress, isMobile);
+        showSuccessState(slider, sliderText, progress, isMobile);
         setCookie("npow_clearance", 5, validationResult.cookieHash);
         window.parent.postMessage(
-          {
-            type: "ncaptcha-solved",
-            token: validationResult.cookieHash,
-          },
+          { type: "ncaptcha-solved", token: validationResult.cookieHash },
           "*",
         );
       } else {
-        showFailureState(slider, text, progress, isMobile);
+        showFailureState(slider, sliderText, progress, isMobile);
       }
     } else {
       slider.style.transition = "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
       progress.style.transition = "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)";
-
       slider.style.left = "0px";
       progress.style.width = "0px";
-
       setTimeout(() => {
         slider.style.transition = "";
         progress.style.transition = "";
@@ -447,9 +617,7 @@ export async function start() {
   slider.addEventListener(
     "touchstart",
     (e) => {
-      if (!completed) {
-        e.stopPropagation();
-      }
+      if (!completed) e.stopPropagation();
     },
     { passive: false },
   );
@@ -457,9 +625,7 @@ export async function start() {
   slider.addEventListener(
     "touchmove",
     (e) => {
-      if (active) {
-        e.stopPropagation();
-      }
+      if (active) e.stopPropagation();
     },
     { passive: false },
   );
@@ -470,7 +636,6 @@ function showVerifyingState(slider, text) {
   slider.classList.add("verifying");
   slider.style.cursor = "default";
   text.textContent = "Verifying...";
-
   const spinner = document.createElement("div");
   spinner.classList.add("spinner");
   slider.appendChild(spinner);
@@ -484,10 +649,7 @@ function showSuccessState(slider, text, progress, isMobile) {
   slider.style.cursor = "default";
   slider.innerHTML = '<span class="checkmark">✓</span>';
   text.textContent = isMobile ? "Verified!" : "Verified successfully";
-
-  if (isMobile && "vibrate" in navigator) {
-    navigator.vibrate([50, 50, 50]);
-  }
+  if (isMobile && "vibrate" in navigator) navigator.vibrate([50, 50, 50]);
 }
 
 function showFailureState(slider, text, progress, isMobile) {
@@ -498,8 +660,5 @@ function showFailureState(slider, text, progress, isMobile) {
   slider.style.cursor = "default";
   slider.innerHTML = '<span class="error-icon">✕</span>';
   text.textContent = isMobile ? "Failed" : "Verification failed";
-
-  if (isMobile && "vibrate" in navigator) {
-    navigator.vibrate([100, 50, 100]);
-  }
+  if (isMobile && "vibrate" in navigator) navigator.vibrate([100, 50, 100]);
 }
