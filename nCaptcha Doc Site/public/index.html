@@ -10,12 +10,21 @@
   </head>
   <script>
     window.addEventListener("message", async (event) => {
+      // Security: Only accept messages from captcha subdomain
+      if (event.origin !== "https://challenges.netforensics.dev") {
+        console.warn(
+          "Received message from unauthorized origin:",
+          event.origin,
+        );
+        return;
+      }
+
       if (event.data?.type !== "ncaptcha-solved") return;
 
       const token = event.data.token;
 
       if (token) {
-        console.log("Human verified using iFrame returned token");
+        console.log("Human verified using iFrame returned token:", token);
       }
     });
     document.addEventListener("DOMContentLoaded", () => {
@@ -75,9 +84,9 @@
               src="https://challenges.netforensics.dev"
               frameborder="0"
               scrolling="no"
-              allow="cross-origin-isolated"
               sandbox="allow-same-origin allow-scripts"
-              tabindex="0"
+              style="width: 100%; max-width: 400px; height: 100px;"
+              title="nCaptcha Widget"
             ></iframe>
           </div>
         </section>
