@@ -1,0 +1,18 @@
+{
+  "name": "ncaptcha-server",
+  "version": "2.0.0",
+  "description": "nCaptcha Server-Side Validation System",
+  "type": "module",
+  "main": "ValidationServer.js",
+  "scripts": {
+    "start": "node ValidationServer.js",
+    "dev": "NODE_ENV=development node ValidationServer.js"
+  },
+  "author": "oaui",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1"
+  }
+}
