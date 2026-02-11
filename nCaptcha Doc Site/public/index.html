@@ -63,7 +63,6 @@
             border: none;
             overflow: hidden;
             width: 380px;
-            height: 65px;
             border-radius: 8px;
           }
         </style>
@@ -208,7 +207,7 @@
 &lt;script&gt;
   // Listen for verification success
   window.addEventListener('message', (event) => {
-    if (event.data.type === 'captcha-verified') {
+    if (event.data.type === 'ncaptcha-solved') {
       console.log('User verified!');
       // Proceed with form submission
     }

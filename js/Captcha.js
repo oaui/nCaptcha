@@ -433,7 +433,7 @@ export async function start() {
         <span class="invisible-checkmark">✓</span>
         <span class="invisible-text">${isMobile ? "Verified!" : "Verified successfully"}</span>
       `;
-      setCookie("npow_clearance", 5, validationResult.cookieHash);
+      await setCookie("npow_clearance", 5, validationResult.cookieHash);
       window.parent.postMessage(
         { type: "ncaptcha-solved", token: validationResult.cookieHash },
         "*",
@@ -594,7 +594,7 @@ export async function start() {
 
       if (validationResult.validationSuccess) {
         showSuccessState(slider, sliderText, progress, isMobile);
-        setCookie("npow_clearance", 5, validationResult.cookieHash);
+        await setCookie("npow_clearance", 5, validationResult.cookieHash);
         window.parent.postMessage(
           { type: "ncaptcha-solved", token: validationResult.cookieHash },
           "*",
