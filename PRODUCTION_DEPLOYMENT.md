@@ -53,6 +53,7 @@ nano .env
 ```
 
 **Production `.env`:**
+
 ```env
 # Production Secret (generate new one!)
 NPOW_SECRET=<generate-with-openssl-rand-base64-32>
@@ -71,6 +72,7 @@ NODE_ENV=production
 ```
 
 **Generate secret:**
+
 ```bash
 openssl rand -base64 32
 ```
@@ -106,6 +108,7 @@ curl http://localhost:8910/api/health
 ```
 
 Should return:
+
 ```json
 {
   "success": true,
@@ -142,13 +145,13 @@ Should return:
 Edit `client/js/API.js` line 6-9:
 
 ```javascript
-const API_BASE_URL =
-  window.location.hostname.includes("github.dev")
-    ? `https://${window.location.hostname.replace(/-\d+/, "-8910")}`
-    : "https://challenges.netforensics.dev:8910";  // Update this!
+const API_BASE_URL = window.location.hostname.includes("github.dev")
+  ? `https://${window.location.hostname.replace(/-\d+/, "-8910")}`
+  : "https://challenges.netforensics.dev:8910"; // Update this!
 ```
 
 Or for clean URLs (if using nginx proxy):
+
 ```javascript
 const API_BASE_URL = "https://challenges.netforensics.dev";
 ```
@@ -251,10 +254,12 @@ sudo certbot renew --dry-run
 ### 5.1 Update HTML
 
 Your demo site HTML is already configured! Both files now use:
+
 - ✅ `https://challenges.netforensics.dev/iframe.html` as source
 - ✅ Origin check: `event.origin !== 'https://challenges.netforensics.dev'`
 
 Files ready:
+
 - ✅ `nCaptcha Doc Site/public/index.html` (updated)
 - ✅ `nCaptcha Doc Site/public/index-updated.html` (ready)
 
@@ -271,14 +276,17 @@ Add an endpoint to verify tokens server-side:
 
 ```javascript
 // Your backend (netforensics.dev)
-app.post('/api/verify-captcha', async (req, res) => {
+app.post("/api/verify-captcha", async (req, res) => {
   const { captchaToken } = req.body;
 
-  const response = await fetch('https://challenges.netforensics.dev/api/verify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: captchaToken })
-  });
+  const response = await fetch(
+    "https://challenges.netforensics.dev/api/verify",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ token: captchaToken }),
+    },
+  );
 
   const result = await response.json();
   res.json({ valid: result.valid });
@@ -300,6 +308,7 @@ curl https://challenges.netforensics.dev/api/challenge
 ### 7.2 Test Widget
 
 Open: `https://challenges.netforensics.dev/iframe.html`
+
 - Should see captcha widget
 - Test slider mode
 - Test invisible mode
@@ -307,6 +316,7 @@ Open: `https://challenges.netforensics.dev/iframe.html`
 ### 7.3 Test Demo Site
 
 Open: `https://netforensics.dev`
+
 - Scroll to demo section
 - iframe should load captcha
 - Complete captcha
@@ -317,13 +327,14 @@ Open: `https://netforensics.dev`
 
 ```javascript
 // In browser console on netforensics.dev
-window.addEventListener('message', (e) => {
-  console.log('Origin:', e.origin);
-  console.log('Data:', e.data);
+window.addEventListener("message", (e) => {
+  console.log("Origin:", e.origin);
+  console.log("Data:", e.data);
 });
 ```
 
 Complete captcha and verify:
+
 - ✅ Origin: `https://challenges.netforensics.dev`
 - ✅ Data: `{ type: 'ncaptcha-solved', token: '...' }`
 
@@ -367,6 +378,7 @@ sudo ufw enable
 ### 9.2 Rate Limiting (Nginx)
 
 Add to nginx config:
+
 ```nginx
 # Limit requests to API
 limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
@@ -388,6 +400,7 @@ sudo nano /etc/fail2ban/jail.local
 ```
 
 Add:
+
 ```ini
 [nginx-limit-req]
 enabled = true
@@ -401,22 +414,26 @@ bantime = 3600
 ## Troubleshooting
 
 ### iframe doesn't load
+
 - Check: Browser console for errors
 - Verify: SSL certificate valid
 - Test: `curl https://challenges.netforensics.dev/iframe.html`
 - Check: CSP headers allow embedding
 
 ### postMessage not received
+
 - Verify: Origin check matches `https://challenges.netforensics.dev`
 - Check: Browser console for blocked messages
 - Test: `event.origin` in console
 
 ### CORS errors
+
 - Check: Server `.env` has correct `ALLOWED_ORIGINS`
 - Verify: Server restarted after changing `.env`
 - Test: `curl -H "Origin: https://netforensics.dev" https://challenges.netforensics.dev/api/health`
 
 ### API requests fail
+
 - Check: Nginx proxy configuration
 - Verify: PM2 server is running
 - Test: `curl http://localhost:8910/api/health` on server
@@ -427,12 +444,14 @@ bantime = 3600
 If issues occur:
 
 1. **Disable captcha temporarily:**
+
    ```javascript
    // In demo site
    const CAPTCHA_ENABLED = false;
    ```
 
 2. **Check server logs:**
+
    ```bash
    pm2 logs ncaptcha-server
    ```
