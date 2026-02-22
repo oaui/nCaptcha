@@ -8,11 +8,12 @@ Advanced behavioral analysis and fingerprinting to detect automated browsers lik
 
 ---
 
-## Why nCaptcha?
+## What is nCaptcha?
 
 Unlike traditional CAPTCHAs, all detection logic runs on your server. This makes it impossible for attackers to reverse-engineer or bypass the protection mechanisms.
 
 **Key advantages:**
+
 - All validation happens server-side
 - Cryptographically signed tokens (HMAC-SHA256)
 - Multiple detection layers working together
@@ -30,11 +31,11 @@ Unlike traditional CAPTCHAs, all detection logic runs on your server. This makes
 
 ## Performance
 
-| Metric | Value |
-|--------|-------|
-| Bot Detection Rate | 99.7% |
-| Average Solve Time | <2s |
-| False Positive Rate | 0% |
+| Metric              | Value |
+| ------------------- | ----- |
+| Bot Detection Rate  | 99.7% |
+| Average Solve Time  | <2s   |
+| False Positive Rate | 0%    |
 
 ## How It Works
 
@@ -50,34 +51,14 @@ Analyzes mouse movement patterns, acceleration, and timing. Detects inhuman patt
 Captures browser properties including native function signatures and prototype chains. Detects framework modifications.
 
 **4. Automation Framework Detection**
+
 - **Playwright**: Missing InterestEvent and SpeechRecognitionPhrase APIs
 - **Puppeteer**: Non-native screen accessors
-- **Selenium**: ret_nodes property, cdc_ prefixed variables
+- **Selenium**: ret*nodes property, cdc* prefixed variables
 - **WebDriver**: navigator.webdriver flag
 
 **5. Integrity Checks**
 Validates function patching, descriptor manipulation, and secure context integrity.
-
-## Quick Start
-
-### Installation
-
-```bash
-# Clone repository
-git clone https://github.com/yourusername/nCaptcha.git
-cd nCaptcha
-
-# Install server dependencies
-cd server
-npm install
-
-# Configure environment
-cp .env.example .env
-# Edit .env and set NPOW_SECRET (generate with: openssl rand -base64 32)
-
-# Start server
-npm start
-```
 
 ### Configuration
 
@@ -92,6 +73,7 @@ NODE_ENV=production
 ```
 
 Generate a secure secret:
+
 ```bash
 openssl rand -base64 32
 ```
@@ -108,14 +90,14 @@ openssl rand -base64 32
 ></iframe>
 
 <script>
-window.addEventListener('message', (event) => {
-  if (event.origin !== 'https://your-captcha-domain.com') return;
+  window.addEventListener("message", (event) => {
+    if (event.origin !== "https://your-captcha-domain.com") return;
 
-  if (event.data.type === 'ncaptcha-solved') {
-    const token = event.data.token;
-    verifyWithBackend(token);
-  }
-});
+    if (event.data.type === "ncaptcha-solved") {
+      const token = event.data.token;
+      verifyWithBackend(token);
+    }
+  });
 </script>
 ```
 
@@ -126,18 +108,18 @@ window.addEventListener('message', (event) => {
 #### Node.js
 
 ```javascript
-app.post('/submit', async (req, res) => {
+app.post("/submit", async (req, res) => {
   const { captchaToken } = req.body;
 
-  const response = await fetch('https://your-captcha-domain.com/api/verify', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ token: captchaToken })
+  const response = await fetch("https://your-captcha-domain.com/api/verify", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token: captchaToken }),
   });
 
   const result = await response.json();
   if (!result.valid) {
-    return res.status(400).json({ error: 'Invalid captcha' });
+    return res.status(400).json({ error: "Invalid captcha" });
   }
 
   // Process request
@@ -186,6 +168,7 @@ function verifyCaptcha($token) {
 Initialize a new captcha challenge.
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -199,16 +182,22 @@ Initialize a new captcha challenge.
 Submit captcha for server-side validation.
 
 **Request:**
+
 ```json
 {
   "challengeId": "abc123...",
-  "requestData": { /* browser fingerprint */ },
-  "interactionData": { /* captured events */ },
+  "requestData": {
+    /* browser fingerprint */
+  },
+  "interactionData": {
+    /* captured events */
+  },
   "mode": { "slider": true, "invisible": false }
 }
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -223,6 +212,7 @@ Submit captcha for server-side validation.
 Verify an existing token.
 
 **Request:**
+
 ```json
 {
   "token": "eyJhbG..."
@@ -230,6 +220,7 @@ Verify an existing token.
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -301,7 +292,7 @@ server {
 ### Scaling with Redis
 
 ```javascript
-import Redis from 'ioredis';
+import Redis from "ioredis";
 
 const redis = new Redis();
 
