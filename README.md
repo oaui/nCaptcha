@@ -4,7 +4,7 @@
 
 Advanced behavioral analysis and fingerprinting to detect automated browsers like Playwright, Puppeteer, and Selenium without disrupting legitimate users.
 
-[Live Demo (Currently not available due to server costs!!!](https://netforensics.dev)
+[Live Demo (Currently not available due to server costs!)](https://netforensics.dev)
 
 ---
 
