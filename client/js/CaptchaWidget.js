@@ -422,7 +422,6 @@ export async function start() {
     if (isMobile && "vibrate" in navigator) navigator.vibrate(30);
 
     const interactionData = {
-      mouseMovements: [],
       pointerEvents: [],
       pointerClickDurations: [],
       clicks: [],
@@ -460,20 +459,9 @@ export async function start() {
   let unlocked = false;
 
   const interactionData = {
-    mouseMovements: [],
     pointerEvents: [],
     pointerClickDurations: [],
     clicks: [],
-  };
-
-  const mouseMoveHandler = (e) => {
-    if (!active) return;
-    interactionData.mouseMovements.push({
-      x: e.clientX,
-      y: e.clientY,
-      t: Date.now(),
-      isTrusted: e.isTrusted,
-    });
   };
 
   const pointerMoveHandler = (e) => {
@@ -483,6 +471,10 @@ export async function start() {
       y: e.clientY,
       t: Date.now(),
       pressure: e.pressure,
+      /**
+       * PointerType either: mouse, pen, touch
+       * TODO: On server, check, if pointerType matches the device type
+       */
       pointerType: e.pointerType,
       isTrusted: e.isTrusted,
     });
@@ -498,26 +490,35 @@ export async function start() {
     });
   };
 
-  // Click handler to unlock the slider
-  slider.addEventListener("click", (clickEvent) => {
-    if (!unlocked && !completed) {
-      clickEvent.preventDefault();
-      clickEvent.stopPropagation();
+  window.addEventListener("focusin", async function (focusEvent) {
+    document.addEventListener("pointermove", pointerMoveHandler);
+  });
 
-      unlocked = true;
-      slider.classList.remove("locked");
-      slider.classList.add("unlocked");
-      slider.innerHTML = "▶";
-      sliderText.textContent = isMobile ? "Swipe to verify" : "Slide to verify";
-
-      modeSelector.style.opacity = "0.5";
-      modeSelector.style.pointerEvents = "none";
-
-      if (isMobile && "vibrate" in navigator) navigator.vibrate(30);
-    }
+  window.addEventListener("focusout", async function (focusEvent) {
+    document.removeEventListener("pointermove", pointerMoveHandler);
   });
 
   document.addEventListener("pointerdown", async (downEvent) => {
+    slider.addEventListener("pointerdown", async (clickEvent) => {
+      if (!unlocked && !completed) {
+        clickEvent.preventDefault();
+        clickEvent.stopPropagation();
+
+        unlocked = true;
+        slider.classList.remove("locked");
+        slider.classList.add("unlocked");
+        slider.innerHTML = "▶";
+        sliderText.textContent = isMobile
+          ? "Swipe to verify"
+          : "Slide to verify";
+
+        modeSelector.style.opacity = "0.5";
+        modeSelector.style.pointerEvents = "none";
+
+        if (isMobile && "vibrate" in navigator) navigator.vibrate(30);
+      }
+    });
+
     if (completed || !unlocked || activeMode !== "slider") return;
 
     pointerClickDuration = performance.now();
@@ -536,8 +537,6 @@ export async function start() {
     slider.setPointerCapture(downEvent.pointerId);
     slider.style.transition = "none";
 
-    document.addEventListener("mousemove", mouseMoveHandler);
-    document.addEventListener("pointermove", pointerMoveHandler);
     document.addEventListener("click", clickHandler);
   });
 
@@ -574,8 +573,6 @@ export async function start() {
     releaseEvent.preventDefault();
     active = false;
 
-    document.removeEventListener("mousemove", mouseMoveHandler);
-    document.removeEventListener("pointermove", pointerMoveHandler);
     document.removeEventListener("click", clickHandler);
 
     slider.style.transition = "";

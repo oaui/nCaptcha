@@ -34,7 +34,7 @@ function detectBrowserInfo() {
       "csi" in window.chrome ||
       "loadTimes" in window.chrome ||
       !!window.navigator.userAgentData?.brands?.some((b) =>
-        b.brand.includes("Chromium")
+        b.brand.includes("Chromium"),
       ));
 
   const isFirefox = typeof InstallTrigger !== "undefined";
@@ -77,7 +77,7 @@ function getMouseEventDescriptor() {
   try {
     const desc = Object.getOwnPropertyDescriptor(
       MouseEvent.prototype,
-      Symbol.toStringTag
+      Symbol.toStringTag,
     );
     if (desc) {
       return {

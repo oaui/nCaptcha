@@ -31,7 +31,7 @@ export async function startValidation(interactionData, mode) {
     requestData,
     interactionData,
     mode,
-    navigator.userAgent
+    navigator.userAgent,
   );
 
   if (validationResult.success && validationResult.validationSuccess) {
