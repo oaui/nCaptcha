@@ -586,8 +586,7 @@ export async function start() {
 
       showVerifyingState(slider, sliderText);
 
-      const mode = { invisible: false, slider: true, click: false };
-      const validationResult = await startValidation(interactionData, mode);
+      const validationResult = await startValidation(interactionData);
 
       // Move slider
       slider.style.left = `${completionThreshold}px`;

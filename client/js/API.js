@@ -3,10 +3,9 @@
  * Refactored: Communicates with server-side validation
  */
 
-const API_BASE_URL =
-  window.location.hostname.includes("github.dev")
-    ? `https://${window.location.hostname.replace(/-\d+/, "-8910")}`
-    : "http://localhost:8910";
+const API_BASE_URL = window.location.hostname.includes("github.dev")
+  ? `https://${window.location.hostname.replace(/-\d+/, "-8910")}`
+  : "http://localhost:8910";
 
 /**
  * Get a new challenge ID from the server
@@ -39,15 +38,13 @@ export async function getChallengeId() {
 export async function apiValidation(
   requestDataOrToken,
   interactionDataOrUserAgent,
-  mode,
-  userAgent
 ) {
   try {
     // Case 1: Token verification (existing token)
-    if (typeof requestDataOrToken === "string" && !mode) {
+    if (typeof requestDataOrToken === "string") {
       return await verifyExistingToken(
         requestDataOrToken,
-        interactionDataOrUserAgent
+        interactionDataOrUserAgent,
       );
     }
 
@@ -75,7 +72,6 @@ export async function apiValidation(
         challengeId,
         requestData,
         interactionData,
-        mode,
       }),
     });
 

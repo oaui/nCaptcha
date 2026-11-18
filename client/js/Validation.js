@@ -6,7 +6,7 @@ import { hasCookie } from "./util/Cookie.js";
  * Client-side validation orchestrator
  * Refactored: Only captures and sends data to server
  */
-export async function startValidation(interactionData, mode) {
+export async function startValidation(interactionData) {
   /**
    * Check if user already has a valid cookie
    */
@@ -27,12 +27,7 @@ export async function startValidation(interactionData, mode) {
    */
   const requestData = await getRequestData();
 
-  const validationResult = await apiValidation(
-    requestData,
-    interactionData,
-    mode,
-    navigator.userAgent,
-  );
+  const validationResult = await apiValidation(requestData, interactionData);
 
   if (validationResult.success && validationResult.validationSuccess) {
     return {
